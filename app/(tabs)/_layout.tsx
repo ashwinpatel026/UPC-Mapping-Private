@@ -63,6 +63,15 @@ export default function TabLayout() {
             ),
           }}
         />
+        <Tabs.Screen
+          name="notifications/index"
+          options={{
+            title: "Notifications",
+            tabBarIcon: ({ color }) => (
+              <Octicons size={28} name="bell" color={color} />
+            ),
+          }}
+        />
       </Tabs>
     </SafeAreaView>
   );
