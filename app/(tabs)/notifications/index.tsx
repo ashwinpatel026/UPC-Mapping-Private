@@ -1,35 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, Linking } from "react-native";
-import axios from "axios";
-import { ENDPOINTS } from "@/config";
+import { useGetNotificationsQuery } from "@/lib/apiSlice";
 
 const operationTypes = ["all", "type1", "type2", "type3"];
 
+type ItemType = {
+  id: string;
+  title: string;
+  body: string;
+  link: string;
+  operation_type: string;
+};
+
 export default function NotificationsScreen() {
-  const [notifications, setNotifications] = useState([]);
   const [filter, setFilter] = useState("all");
-  const [loading, setLoading] = useState(false);
+  const { data = [], isLoading } = useGetNotificationsQuery(
+    filter === "all" ? undefined : filter
+  );
 
-  useEffect(() => {
-    fetchNotifications();
-  }, [filter]);
-
-  const fetchNotifications = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(
-        filter === "all"
-          ? ENDPOINTS.GET_NOTIFICATIONS
-          : `${ENDPOINTS.GET_NOTIFICATIONS}?operation_type=${filter}`
-      );
-      setNotifications(res.data.data || []);
-    } catch (err) {
-      setNotifications([]);
-    }
-    setLoading(false);
-  };
-
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }: { item: ItemType }) => (
     <TouchableOpacity
       className="bg-white rounded-lg p-4 mb-2 border border-gray-200"
       onPress={() => Linking.openURL(item.link)}
@@ -57,11 +46,11 @@ export default function NotificationsScreen() {
           </TouchableOpacity>
         ))}
       </View>
-      {loading ? (
+      {isLoading ? (
         <Text>Loading...</Text>
       ) : (
         <FlatList
-          data={notifications}
+          data={data}
           keyExtractor={(item, idx) => item.id?.toString() || idx.toString()}
           renderItem={renderItem}
           ListEmptyComponent={<Text>No notifications found.</Text>}

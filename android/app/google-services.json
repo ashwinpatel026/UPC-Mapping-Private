@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "619900651443",
+    "project_id": "ripsnotificationapp",
+    "storage_bucket": "ripsnotificationapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:619900651443:android:cdcc72e0f9cbcdef1badc6",
+        "android_client_info": {
+          "package_name": "com.importproduct.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBLRFISI7DG4fOlPDhLKr0nt9meNCZ09o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

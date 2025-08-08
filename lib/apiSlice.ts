@@ -41,6 +41,13 @@ export const apiSlice = createApi({
       query: () => "/backoffice/product/search_description",
       transformResponse: (res: { data: any[] }) => res.data,
     }),
+    getNotifications: builder.query<any[], string | void>({
+      query: (operationType) =>
+        operationType && operationType !== "all"
+          ? `/backoffice/get_notifications/show/${operationType}`
+          : "/backoffice/get_notifications",
+      transformResponse: (res: { data?: any[] }) => res.data ?? [],
+    }),
   }),
 });
 
@@ -51,4 +58,5 @@ export const {
   useGetProductTypesQuery,
   useGetFirstCategoryQuery,
   useGetSearchDescriptionQuery,
+  useGetNotificationsQuery,
 } = apiSlice;

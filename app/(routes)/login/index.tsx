@@ -18,8 +18,7 @@ import WelcomeHeader from "@/components/WelcomeHeader";
 import { ActivityIndicator } from "react-native";
 import AlertModal from "@/components/AlertModal";
 import { IsIPAD } from "@/themes/app.constant";
-import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 export default function index() {
   const [user, setUser] = useState("");
@@ -35,6 +34,7 @@ export default function index() {
   });
 
   const router = useRouter();
+  const { expoPushToken } = usePushNotifications();
 
   const initialErrors = {
     user: false,
@@ -93,35 +93,19 @@ export default function index() {
           "accessToken",
           response.data.data.access_token
         );
-        // --- Push Notification Logic ---
-        let expoPushToken = null;
-        if (Device.isDevice) {
-          const { status: existingStatus } =
-            await Notifications.getPermissionsAsync();
-          let finalStatus = existingStatus;
-          if (existingStatus !== "granted") {
-            const { status } = await Notifications.requestPermissionsAsync();
-            finalStatus = status;
-          }
-          if (finalStatus === "granted") {
-            const tokenData = await Notifications.getExpoPushTokenAsync();
-            expoPushToken = tokenData.data;
-            // Send token to backend
-            try {
-              await axios.post(ENDPOINTS.SAVE_PUSH_TOKEN, {
-                userId: response.data.data.user_id, // adjust as per your backend
-                pushToken: expoPushToken,
-              });
-            } catch (err) {
-              console.log("Failed to save push token:", err);
-            }
+        // Send Expo push token (from hook) to backend if available
+        try {
+          if (expoPushToken?.data) {
+            await axios.post(ENDPOINTS.SAVE_PUSH_TOKEN, {
+              userId: response.data.data.user_id,
+              pushToken: expoPushToken.data,
+            });
           } else {
-            console.log("Push notification permission not granted");
+            console.log("Expo push token not available yet");
           }
-        } else {
-          console.log("Must use physical device for Push Notifications");
+        } catch (err) {
+          console.log("Failed to save push token:", err);
         }
-        // --- End Push Notification Logic ---
         router.push("/(tabs)");
       } else {
         setModal({
