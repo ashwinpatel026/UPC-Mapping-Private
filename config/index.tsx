@@ -1,4 +1,4 @@
-const BACKEND_URL = "http://192.168.1.151/backoffice_web_master/api";
+const BACKEND_URL = "http://192.168.0.7/backoffice_web_master/api";
 
 export const GET_ALL_PRODUCTS = `${BACKEND_URL}/product`;
 export const LOGIN_USER = `${BACKEND_URL}/auth/login`;
