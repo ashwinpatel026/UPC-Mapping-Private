@@ -21,7 +21,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
   }
 }
 
-rootProject.name = 'Acute POS'
+rootProject.name = 'AcutePOS'
 
 dependencyResolutionManagement {
   versionCatalogs {
