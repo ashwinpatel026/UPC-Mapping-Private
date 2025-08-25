@@ -7,7 +7,7 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+
 import "react-native-reanimated";
 import Toast from "react-native-toast-message";
 import { ToastConfig } from "../components/ToastConfig";
@@ -23,12 +23,42 @@ import {
 } from "@expo-google-fonts/poppins";
 import { Provider } from "react-redux";
 import { store } from "@/lib/store";
+import { useEffect } from "react";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useSavePushTokenMutation } from "@/lib/apiSlice";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function RootContent() {
   const colorScheme = useColorScheme();
+
+  // Register for push notifications and upload token when available
+  const { expoPushToken } = usePushNotifications();
+  const [savePushToken] = useSavePushTokenMutation();
+
+  useEffect(() => {
+    if (expoPushToken?.data) {
+      const tokenString =
+        typeof expoPushToken.data === "string"
+          ? expoPushToken.data
+          : "" + expoPushToken.data;
+      savePushToken({ token: tokenString }).catch(() => {});
+    }
+  }, [expoPushToken?.data]);
+
+  return (
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+      </Stack>
+      <StatusBar style="auto" />
+      <Toast config={ToastConfig} />
+    </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     Poppins_600SemiBold,
@@ -51,15 +81,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <Provider store={store}>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-          </Stack>
-          <StatusBar style="auto" />
-          <Toast config={ToastConfig} />
-        </ThemeProvider>
+        <RootContent />
       </Provider>
     </SafeAreaProvider>
   );

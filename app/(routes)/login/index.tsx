@@ -19,6 +19,7 @@ import { ActivityIndicator } from "react-native";
 import AlertModal from "@/components/AlertModal";
 import { IsIPAD } from "@/themes/app.constant";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { buildDevicePayload } from "@/utils/device";
 
 export default function index() {
   const [user, setUser] = useState("");
@@ -79,6 +80,7 @@ export default function index() {
     setIsSigningIn(true);
 
     try {
+      console.log(ENDPOINTS.LOGIN_USER);
       const response = await axios({
         method: "post",
         url: ENDPOINTS.LOGIN_USER,
@@ -93,12 +95,20 @@ export default function index() {
           "accessToken",
           response.data.data.access_token
         );
-        // Send Expo push token (from hook) to backend if available
+        // Store userId for notifications
+        await SecureStore.setItemAsync(
+          "userId",
+          response.data.data.data.user_id.toString()
+        );
+        // Send Expo push token (from hook) + device metadata to backend if available
         try {
           if (expoPushToken?.data) {
-            await axios.post(ENDPOINTS.SAVE_PUSH_TOKEN, {
-              userId: response.data.data.user_id,
+            const payload = await buildDevicePayload({
+              userId: response.data.data.data.user_id,
               pushToken: expoPushToken.data,
+            });
+            await axios.post(ENDPOINTS.SAVE_PUSH_TOKEN, payload, {
+              headers: CONFIG.headers,
             });
           } else {
             console.log("Expo push token not available yet");

@@ -14,8 +14,8 @@ export interface PushNotificationState {
 export const usePushNotifications = (): PushNotificationState => {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
-      shouldPlaySound: false,
-      shouldShowAlert: false,
+      shouldPlaySound: true,
+      shouldShowAlert: true,
       shouldSetBadge: false,
     }),
   });
@@ -78,7 +78,25 @@ export const usePushNotifications = (): PushNotificationState => {
 
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
+        try {
+          const data =
+            response.notification.request.content.data as Record<string, any>;
+
+          const typeValue = (data?.operation_type || data?.type || "all") as
+            | string
+            | undefined;
+
+          // Always open notifications tab and pre-select the type filter
+          // Lazy import to avoid circular deps
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const { router } = require("expo-router");
+          router.push({
+            pathname: "/(tabs)/notifications",
+            params: { type: typeof typeValue === "string" ? typeValue : "all" },
+          });
+        } catch (err) {
+          console.log("Notification response handling error", err);
+        }
       });
 
     return () => {
